@@ -1,0 +1,19 @@
+.l-btn-text {
+	font-size: 15px;
+}
+
+body {
+	padding: 0px;
+	background-color: #D2E0F2;
+}
+
+a {
+	color: Black;
+	text-decoration: none;
+}
+
+a:hover {
+	color: Red;
+	text-decoration: underline;
+}
+

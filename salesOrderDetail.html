@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="css/basic.css" />
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	</head>
+
+	<body>
+		<div class="toolbar-buttons">
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-left',plain:'true'" onclick="frontpage()">上张</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-right',plain:'true'" onclick="nextpage()">下张</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-print',plain:'true'">打印原始销售单</a>
+			<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-print',plain:'true'">打印执行销售单</a>
+		</div>
+
+		<!-------------------------displaytable-------------------------->
+		<table class="displaytable" style="text-align: left; margin-bottom: 10px;">
+			<tr>
+				<td width="20%"> 销售单号</td>
+				<td width="30%">
+					<div>
+						<input name="ORDER_NO" class="easyui-textbox" style="width:300px" disabled>
+					</div>
+				</td>
+				<td width="20%"> 用户组</td>
+				<td width="30%">
+					<div>
+						<input name="CUSTOMER_TYPE" class="easyui-textbox" style="width:300px" disabled>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td width="20%"> 配送单位</td>
+				<td width="30%">
+					<div>
+						<input name="CUSTOMER_NAME" class="easyui-textbox" style="width:300px" disabled>
+					</div>
+				</td>
+				<td width="20%"> 配送时间</td>
+				<td width="30%">
+					<div>
+						<input name="CREATE_TIME" class="easyui-textbox" style="width:300px" disabled>
+					</div>
+				</td>
+			</tr>
+		</table>
+
+		<!--DIALOG弹出框-->
+		<!--<div id="dialog"></div>-->
+
+		<!----------------------datagrid-------------------------->
+		<table id="details" class="easyui-datagrid" style="background-color: #EFEFEF; height: 300px;"></table>
+
+		<div id="dialogDetail" class="easyui-dialog" onmousemove="sum();" closed="true" style="padding: 10px;">
+
+			<form id="formNew" method="post">
+				<div>
+					<input class="easyui-textbox" id="goodsName" style="width:90%" data-options="label:'内部商品名'">
+				</div>
+				<div>
+					<input class="easyui-textbox" id="goodsType" style="width:90%" data-options="label:'内部商品类型'">
+				</div>
+				<div>
+					<input class="easyui-textbox" id="unit" style="width:90%" data-options="label:'单位'">
+				</div>
+				<div>
+					<input class="easyui-numberbox" id="num" style="width:90%" data-options="label:'数量',precision:'2'">
+				</div>
+				<div>
+					<input class="easyui-numberbox" id="price" style="width:90%" data-options="label:'单价',prefix:'¥: ',precision:'2'">
+				</div>
+				<div>
+					<span>总价</span><input id="sumAccount" class="textbox text" readonly="readonly">
+				</div>
+			</form>
+		</div>
+
+		<div id="footer">
+			<strong>人名币金额合计<span id="detailsAccount"></span></strong>
+			<strong>人名币金额合计(大写)<span id="detailsAccountUpper"></span></strong>
+			<div style="margin: 20px auto;">
+				<table id="detail">
+					<tr>
+						<td>备注</td>
+						<td colspan="7">
+							<input class="easyui-textbox" id="MEMO" style="width:99%">
+						</td>
+					</tr>
+					<tr>
+						<td>制单人 </td>
+						<td>
+							<input class="easyui-textbox" id="CREATE_MAN" style="width:90%">
+						</td>
+						<td> 审核人 </td>
+						<td>
+							<input class="easyui-textbox" style="width:90%">
+						</td>
+						<td> 审核日期 </td>
+						<td>
+							<input class="easyui-datebox" id="AUDITOR_TIME" style="width:90%">
+						</td>
+						<td> 打印次数 </td>
+						<td>
+							<input class="easyui-textbox" id="PRINTCOUNT" style="width:90%">
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="js/functions.js"></script>
+		<script type="text/javascript">
+			//销售单详情页面跳转所用
+			$.ajax({
+				type: "get",
+				url: "http://222.196.35.35:9080/GSMS/logistics/originalorder/pre.do?ID=" + originalId,
+				success: function(msg) {
+					$('#details').datagrid('loadData', msg);
+					$("input").each(function(value) {
+						var a = $(this).attr("textboxname");
+						if(a) {
+							console.log(msg[a]);
+							$(this).textbox("setValue", msg[a]);
+						}
+					});
+					let rows = $("#details").datagrid('getRows');
+					let sum = 0;
+					for(let i = 0; i < rows.length; i++) {
+						sum += rows[i].SUM;
+					}
+					$("#detailsAccount").text("￥ " + sum);
+					let uper = digitUppercase(sum);
+					$("#detailsAccountUpper").text(uper);
+				}
+			});
+		</script>
+	</body>
+	<script>
+		$(document).ready(function() {
+			sunAll();
+		})
+	</script>
+
+</html>

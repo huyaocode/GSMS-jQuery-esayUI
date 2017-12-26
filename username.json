@@ -1,0 +1,43 @@
+[
+	{
+		"CUSTOMER_NAME": "绵阳高新区资江电子元件有限公司",
+		"CREATE_TIME": "2017/09/06",
+		"CONTACT_NAME": "15",
+		"TYPE_ID": 8,
+		"ID": 176,
+		"CONTACT_TEL": "024250",
+		"PINYINFIELDNAME": "mygxqzjdzyjyxgs",
+		"CUSTOMER_TYPE": "零散客户（先定价）",
+		"CREATE_MAN": "超级管理员"
+	}, {
+		"CUSTOMER_NAME": "凯菲特酒店",
+		"CREATE_TIME": "2017/3/1",
+		"CONTACT_NAME": "",
+		"TYPE_ID": 14,
+		"ID": 173,
+		"CONTACT_TEL": "",
+		"PINYINFIELDNAME": "kftjd",
+		"CUSTOMER_TYPE": "零散客户（实时定价）",
+		"CREATE_MAN": "admin"
+	}, {
+		"CUSTOMER_NAME": "南山实验学校一食堂",
+		"CREATE_TIME": "2017/3/1",
+		"CONTACT_NAME": "",
+		"TYPE_ID": 7,
+		"ID": 171,
+		"CONTACT_TEL": "",
+		"PINYINFIELDNAME": "nssyxxyst",
+		"CUSTOMER_TYPE": "南山实验中学",
+		"CREATE_MAN": "admin"
+	}, {
+		"CUSTOMER_NAME": "南山中学一食堂",
+		"CREATE_TIME": "2017/3/1",
+		"CONTACT_NAME": "",
+		"TYPE_ID": 6,
+		"ID": 170,
+		"CONTACT_TEL": "",
+		"PINYINFIELDNAME": "nszxyst",
+		"CUSTOMER_TYPE": "南山中学",
+		"CREATE_MAN": "admin"
+	}
+]

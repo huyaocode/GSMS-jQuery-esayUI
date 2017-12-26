@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="css/salesOrder.css">
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	</head>
+
+	<body>
+		<!------------------------comboxs------------------------>
+		<div class="search">查询</div>
+		<table id="tools" cellspacing="5">
+			<tr>
+				<td>用户组</td>
+				<td>
+					<input id="cc1" class="easyui-combobox" >
+				</td>
+				<td>配送单位</td>
+				<td>
+					<input id="cc1" class="easyui-combobox">
+				</td>
+				<td>配送开始时间</td>
+				<td>
+					<input id="cc1" class="easyui-datebox">
+				</td>
+				<td>配送结束时间</td>
+				<td>
+					<input id="cc1" class="easyui-datebox">
+				</td>
+				<td>订单状态</td>
+				<td>
+					<input id="cc1" class="easyui-combobox" data-options="">
+				</td>
+				<td>
+					<a href="###" class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width: 80px;">查询</a>
+				</td>
+			</tr>
+		</table>
+		<!------------------------------------内容区------------------------------------------->
+		<table id="salesOrderInformation" class="easyui-datagrid" style="background-color: #00EE00; height: 400px;">
+			<thead>
+				<tr>
+					<th data-options="field:'ck',checkbox:true,align:'center'"></th>
+					<th data-options="field:'ID',width:'8%',align:'center'">编号</th>
+					<th data-options="field:'CUSTOMER_TYPE',width:'25%',align:'center'">用户组</th>
+					<th data-options="field:'CUSTOMER_NAME',width:'22%',align:'center'">配送单位</th>
+					<th data-options="field:'CREATE_TIME',width:'22%',align:'center'">配送时间</th>
+					<th data-options="field:'STATE',width:'20%',align:'center'">订单状态</th>
+				</tr>
+			</thead>
+		</table>
+		<div id="test">
+			
+		</div>
+		<script type="text/javascript" src="js/functions.js"></script>
+	</body>
+
+</html>

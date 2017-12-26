@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="css/basic.css" />
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+		<script src="js/jquery.edatagrid.js" type="text/javascript"></script>
+	</head>
+
+	<body>
+		<div id="toolbarPO" style="height: 26px; background-color: #eee;"></div>
+
+		<!-------------------------displaytable-------------------------->
+		<table class="displaytable" style="text-align: left; margin-bottom: 10px; ">
+			<img id="check" src="" />
+			<tr>
+				<td width="20%"> <span>*</span> 配送单位</td>
+				<td width="30%">
+					<div>
+						<input class="easyui-combobox" id="combo-CUSTOMER_NAME" name="CUSTOMER_NAME" style="width:300px">
+					</div>
+				</td>
+				<td width="20%"> <span>*</span>用户组</td>
+				<td width="30%">
+					<div>
+						<input class="easyui-textbox" id="input-CUSTOMER_TYPE" name="CUSTOMER_TYPE" style="width:300px">
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td width="20%"> <span>*</span> 订单编号</td>
+				<td width="30%">
+					<div>
+						<input class="easyui-textbox" id="input-ORDER_NO" name="ORDER_NO" style="width:300px" data-options="value: '由系统自动生成,不需要填写',disabled: true" >
+					</div>
+				</td>
+				<td width="20%"> <span>*</span> 配送时间</td>
+				<td width="30%" <div>
+					<input class="easyui-datebox" name="DISTRIBUTION_DATE" id="date-DISTRIBUTION_DATE" style="width:300px" data-options="required:true,missingMessage: '请选择日期'">
+					</div>
+				</td>
+			</tr>
+		</table>
+
+		<!----------------------datagrid-------------------------->
+		<table id="contain" class="easyui-datagrid" style="background-color: #EFEFEF; height: 300px;"></table>
+
+		<div id="footer">
+			<strong>人名币金额合计<input id="account" style="border: none;" readonly></input></strong>
+			<strong>人名币金额合计(大写) <input id="accountUpper" style="border: none; width: 300px;" readonly></input></strong>
+			<div style="margin: 20px auto;">
+				<table id="detail">
+					<tr>
+						<td>备注</td>
+						<td colspan="7">
+							<input class="easyui-textbox" name="MEMO" id="input-MEMO" style="width:99%">
+						</td>
+					</tr>
+					<tr>
+						<td>制单人 </td>
+						<td>
+							<input class="easyui-textbox" name="CREATE_MAN" id="input-CREATE_MAN" style="width:90%">
+						</td>
+						<td> 审核人 </td>
+						<td>
+							<input class="easyui-textbox" name="AUDITOR" id="input-AUDITOR" style="width:90%">
+						</td>
+						<td> 审核日期 </td>
+						<td>
+							<input class="easyui-datebox" name="AUDITOR_TIME" id="AUDITOR_TIME" style="width:90%">
+						</td>
+						<td> 打印次数 </td>
+						<td>
+							<input class="easyui-textbox" name="PRINTCOUNT" id="input-PRINTCOUNT" style="width:90%">
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/functions.js"></script>
+
+		<script>
+			var handOrderId = 0;
+			var MaxPage;
+			var MinPage;
+			var isVerify = -1; // -1 表示无， 0 表示未审核，1表示已通过
+
+			var information = [{}];
+			var message = {};
+
+			//4 个信息框
+			$('#combo-CUSTOMER_NAME').combobox({
+				url: serverAddress + "logistics/customer/listall.do",
+				valueField: 'CUSTOMER_NAME',
+				textField: 'CUSTOMER_NAME',
+				onChange: function(newValue, oldValue) {
+				if(!isEnglish(newValue)) {
+					return;
+				}
+				if(newValue != "" && newValue != undefined) {
+					var url = RemoteLinkAddress + "/logistics/customer/findbypinyin?PINYINFIELDNAME=" + newValue.trim();
+					$(this).combobox("reload", url);
+				}
+			},
+				onSelect: function(record) {
+					$("#input-CUSTOMER_TYPE").textbox("setValue", record.CUSTOMER_TYPE);
+					message.CUSTOMER_ID = record.ID;
+					message.CUSTOMERTYPE_ID = record.TYPE_ID;
+				}
+			})
+
+			function changeState(order) {
+				isVerify = order;
+				var ISVERIFY = document.getElementById("check");
+				if(order == 1) {
+					ISVERIFY.setAttribute("src", "img/checked.png");
+				} else if(order == 0) {
+					ISVERIFY.setAttribute("src", "img/checkfailed.png");
+				} else {
+					ISVERIFY.setAttribute("src", "");
+				}
+			}
+	
+			//生成toolbar
+			createtoolbar("tools");
+
+			//创建datagrid
+			function createEdatagrid() {
+				var currRow; //用于记录正在编辑的datagrid行
+				$("#contain").edatagrid({
+					autoSave: true,
+					data: information,
+					rownumbers: true,
+					singleSelect: true,
+					toolbar: [{
+						iconCls: 'icon-add',
+						plain: 'true',
+						text: "新增明细",
+						handler: function() {
+							$('#contain').edatagrid('addRow');
+						} //为toolbar添加事件
+					}, {
+						iconCls: 'icon-cancel',
+						plain: 'true',
+						text: "取消",
+						handler: function() {
+							$('#contain').edatagrid('cancelRow');
+						}
+					}, {
+						iconCls: 'icon-remove',
+						plain: 'true',
+						text: "删除明细",
+						handler: function() {
+							$('#contain').edatagrid('destroyRow');
+						}
+					}],
+					onSelect: function(index, row) {
+						currRow = index; //得到当前点击的行
+						console.log("当前行： " + currRow);
+					},
+					columns: [
+						[{
+								field: 'INTERNAL_NAME',
+								title: '*内部商品名',
+								width: '15%',
+								align: 'center',
+								editor: {
+									type: 'combobox',
+									options: {
+										valueField: 'INTERNAL_NAME',
+										textField: 'INTERNAL_NAME',
+										method: 'get',
+										panelHeight: 'auto',
+										required: true,
+										missingMessage: "该项必须输入",
+										type: 'textbox',
+										//当输入值发生变化
+										onChange: function(newValue, oldValue) {
+											if(newValue != "") {
+												//调用接口，获取对应东西
+												var url = serverAddress + "logistics/internaltrade/findbypinyin?PINYINFIELDNAME=" + newValue; //调用接口，返回匹配
+												$(this).combobox("reload", url);
+											}
+										},
+										onSelect: function(record) {
+											//创建 editor, 有了editor 就可以得到target,更改数值， editor需要行与 filed ，
+											var ed = $('#contain').datagrid('getEditor', {
+												index: currRow,
+												field: 'INTERNAL_TYPE'
+											});
+											information[currRow].INTERNALTRADE_ID = "" + record.ID;
+											$(ed.target).textbox('setValue', record.INTERNAL_TYPE);
+											var ed = $('#contain').datagrid('getEditor', {
+												index: currRow,
+												field: 'UNIT_NAME'
+											});
+											$(ed.target).textbox('setValue', record.UNIT_NAME);
+											information[currRow].ORDER_ID = message.ID;
+										}
+									}
+								}
+							},
+							{
+								field: 'INTERNAL_TYPE',
+								title: '*内部商品类型',
+								width: '15%',
+								align: 'center',
+								editor: 'textbox',
+							},
+							{
+								field: 'UNIT_NAME',
+								title: '*单位',
+								width: '15%',
+								align: 'center',
+								editor: 'textbox',
+							},
+							{
+								field: 'SELF_AMOUNT',
+								title: '*数量',
+								width: '15%',
+								align: 'center',
+								editor: {
+									type: 'numberbox',
+									options: {
+										precision: 2,
+										required: true,
+										missingMessage: "该项必须输入",
+										onChange: function(newValue, oldValue) {
+											information[currRow].AMOUNT = newValue;
+										}
+									}
+								}
+							},
+							{
+								field: 'UNIT_PRICE',
+								title: '*单价',
+								width: '15%',
+								align: 'center',
+								editor: {
+									type: 'numberbox',
+									options: {
+										precision: '2',
+										onChange: function(newValue, oldValue) {
+											information[currRow].UNIT_PRICE = newValue;
+											if(newValue != 0) {
+												var ed = $('#contain').datagrid('getEditor', {
+													index: currRow,
+													field: 'SUM'
+												});
+												var num = $('#contain').datagrid('getEditor', {
+													index: currRow,
+													field: 'SELF_AMOUNT'
+												});
+												m = $(num.target).val();
+												var money = newValue * m;
+												$(ed.target).numberbox('setValue', money);
+											}
+										}
+									}
+								},
+								// 格式器
+								formatter: function(value, row, index) {
+									if(value) {
+										return "￥" + value;
+									}
+								}
+							},
+							{
+								field: 'SUM',
+								title: '*总价',
+								width: '15%',
+								align: 'center',
+								editor: {
+									type: 'numberbox',
+									options: {
+										readonly: true,
+										precision: '2',
+										onChange: function(newValue, oldValue) {
+											information[currRow].SUM = newValue;
+											var sumAccount = 0;
+											for(let x in information) {
+												if(information[x].SUM != null)
+													sumAccount += parseFloat(information[x].SUM);
+											}
+											$("#account").attr('value', "￥ " + sumAccount);
+											message.LUMP_SUM = sumAccount;
+											$("#accountUpper").attr('value', digitUppercase(sumAccount));
+										}
+									}
+								},
+								formatter: function(value, row, index) {
+									if(value) {
+										return "￥" + value;
+									}
+								}
+							}
+						]
+					]
+				})
+				$('#contain').datagrid('loadData', information);
+			}
+
+			/*
+			 * 获取订单张数上下限
+			 * 将全局变量MaxPage MinPage 填写好
+			 */
+			function getbound() {
+				$.ajax({
+					dataType: 'JSON',
+					type: "get",
+					url: serverAddress + "logistics/originalorder/getmaxminid.do",
+					success: function(msg) {
+						MaxPage = msg.MAXID;
+						MinPage = msg.MINID;
+						console.log("MaxPage " + MaxPage + " MinPage " + MinPage + " handOrderId  " + handOrderId);
+					}, //请求成功后，接受服务器传来的Json字符串，并做相应的处理
+					error: function(xhr, status, error) {
+						$.messager.alert("错误", "请求失败!");
+					}
+				});
+			}
+			/* 上下张
+			 *  order : 传入命令， 为 0 上张，为1下张
+			 */
+			function changePage(order) {
+				getbound();
+				if(handOrderId == 0) {
+					handOrderId = 51;
+				}
+				if(order == 0) {
+					if(handOrderId > MinPage) {
+						var _url = 'http://222.196.35.35:9080/GSMS/logistics/originalorder/pre.do?ID=' + handOrderId;
+						loadDate(_url);
+					} else {
+						$.messager.alert('提示', '没有上张!');
+					}
+				} else {
+					if(handOrderId < MaxPage) {
+						var _url = 'http://222.196.35.35:9080/GSMS/logistics/originalorder/next.do?ID=' + handOrderId;
+						loadDate(_url);
+					} else {
+						$.messager.alert('提示', '没有下张!');
+					}
+				}
+			}
+			/**
+			 * 加载数据
+			 * @param {Object} _url
+			 * 将URL数据获取并调用填写本页面内容函数
+			 * 设置全局变量 handOrderId
+			 */
+			function loadDate(_url) {
+				$.ajax({
+					dataType: 'JSON',
+					type: "get",
+					url: _url,
+					success: function(msg) {
+						console.log("从网上获取的\n");
+						console.log(msg);
+						message = msg;
+						handOrderId = msg.ID;
+						changeState(msg.ISVERIFY); //改变审核状态
+						fillInput(msg);
+						information = msg['rows'];
+						$('#contain').datagrid('loadData', information);
+						getSum(msg.rows); //将表格中总价求和
+					}
+				});
+			}
+			/**
+			 * 算总价调用转换大写金额函数
+			 * @param {Object} data 后台获取数据中用来填充datagrid表的数组
+			 * 遍历数组中ＳＵＭ累加求和并填写总价与大写总价
+			 */
+			function getSum(data) {
+				var psum = 0;
+				for(var i = 0; i < data.length; i++) {
+					if(data[i].SUM != "")
+						psum += parseFloat(data[i].SUM);
+				}
+				$("#account").attr('value', "￥ " + psum);
+				let uper = digitUppercase(psum);
+				$("#accountUpper").attr('value', uper);
+			}
+
+			/**
+			 * 新增订单
+			 * 将ID改变，将页面内内容清空，将审核状态改变，调用初始化表格中信息数组函数，更新表格
+			 */
+			function addOrder() {
+				handOrderId = MaxPage + 1;
+				$("input").each(function() {
+					var a = $(this).attr("textboxname");
+					if(a) {
+						$(this).textbox("setValue", "");
+					}
+					$(this).attr('value', "");
+					if(a == "ORDER_NO") {
+						$(this).textbox("setValue", "由系统自动生成，不需填写");
+					}
+				});
+				changeState(-1);
+				resetInfo();
+				$('#contain').datagrid('loadData', information);
+			}
+			/**
+			 * 将information置为初始状态
+			 * 必须保证这个格式，否则上传数据时会报错
+			 */
+			function resetInfo() {
+				let temp = information[0];
+				information = [{}];
+				information[0] = temp;
+				for(let i in information[0]) {
+					information[0][i] = "";
+				}
+			}
+
+			/**
+			 * 查询订单
+			 * tab中新增销售单页面，并 跳转
+			 */
+			function inquire() {
+				var item = {
+					"menuid": "0131",
+					"text": "销售单",
+					"name": "salesOrder.html"
+				}
+				menuHandler(item);
+			}
+			/**
+			 * 审核订单
+			 * 调用接口审核接口
+			 */
+			function checkOrder() {
+				if(handOrderId < MinPage || handOrderId > MaxPage) {
+					console.log("MaxPage " + MaxPage + " MinPage " + MinPage + " handOrderId  " + handOrderId);
+					$.messager.alert('提示', '该页面为新增页面，不能进行审核操作！');
+				} else if(isVerify == 1) {
+					$.messager.alert('提示', '该订单已通过审核，无须再审!');
+				} else {
+					$.ajax({
+						dataType: 'JSON',
+						url: serverAddress + "logistics/originalorder/verify.do",
+						data: { //需要提交上传的数据————当前页面ID
+							ID: handOrderId,
+						},
+						type: "POST",
+						success: function(result) {
+							$.messager.alert("成功", "审核成功");
+							changeState(1);
+						},
+						error: function(result) {
+							$.messager.alert("失败", "审核失败");
+						}
+					});
+				};
+			}
+			/** $.post 笔记
+			 * 使用POST方式来进行异步请求
+			 * jQuery.post( url, [data], [callback], [type] ) ：
+			 * url (String) : 发送请求的URL地址.
+			 * data (Map) : (可选) 要发送给服务器的数据，以 Key/value 的键值对形式表示。
+			 * callback (Function) : (可选) 载入成功时回调函数(只有当Response的返回状态是success才是调用该方法)。
+			 * type (String) : (可选)官方的说明是：Type of data to be sent。其实应该为客户端请求的类型(JSON,XML,等等)
+			 * 格式：
+			 * $.post("url")，{数据}，function(回调函数)， type（格式）
+			 */
+			/**
+			 * 删除订单
+			 * 跳出确认是否删除确认框，确认后调用删除接口
+			 */
+			function delateOrder() {
+				$.messager.confirm('Confirm', '是否删除', function(r) {
+					if(r) {
+						$.post(serverAddress + "logistics/originalorder/delete.do", {
+								ID: handOrderId,
+							},
+							function(result) {
+								if(result.msg == "success") {
+									$.messager.alert({ // show success message
+										title: '成功',
+										msg: '删除成功'
+									});
+									changePage(1);
+								} else {
+									$.messager.alert({ // show error message
+										title: 'Error',
+										msg: result.msg
+									});
+								}
+							},
+							'json');
+					}
+				});
+			}
+			/*
+			 * 保存订单
+			 * 验证前3个input框是否为空，若为空提示： '原始订单信息不能为空！'
+			 * 验证是否为以审核订单
+			 * 验证成功调用上传数据函数
+			 */
+			function saveOrder() {
+				let isfill = false;
+				if($("input[name='CUSTOMER_NAME']").val() != "" &&
+					$("input[name='CUSTOMER_TYPE']").val() != "" &&
+					$("input[name='DISTRIBUTION_DATE']").val() != "") {
+					isfill = true;
+				}
+				if(isVerify == 1) {
+					$.messager.alert('警告', '订单已审核，不能修改');
+					return;
+				} else if(isfill == false) {
+					$.messager.alert('提示', '原始订单信息不能为空！');
+					return;
+				} else {
+					getDeta(); //将数据整合到messsage里面
+					submitData();
+				}
+			}
+			/**
+			 * 将数据保存到待上传对象里面
+			 */
+			function getDeta() {
+				message['ISWEB'] =  "1";
+				message['rows'] = information;	
+				message.DISTRIBUTION_DATE = $("input[name='DISTRIBUTION_DATE']").val();
+				message.MEMO = $("input[name='MEMO']").val();
+			}
+
+			/**
+			 * 保存数据到后台
+			 * @param {Object} _data 需要上传的数据
+			 * 验证是修改还是新增页面保存，将数据转为JSON 字符串，
+			 * 将提交成功后返回的结果分离成数组，提取其中的订单编号与当前页面ID
+			 */
+			function submitData() {
+				console.log("最终提交的");
+				console.log(message)
+				var _url = "";
+				if(isVerify != 0) {
+					_url = serverAddress + "logistics/originalorder/save.do";
+				} else {
+					_url = serverAddress + "logistics/originalorder/update.do";
+				}
+				var _senddata = JSON.stringify(message); //JSON.stringify() 方法用于将 JavaScript 值转换为 JSON 字符串。
+				$.ajax({
+					dataType: 'JSON',
+					url: _url,
+					data: 'a=' + _senddata,
+					type: "POST",
+					success: function(result) {
+						if(isVerify == -1) { //只有新增的时候才能使用这个，因为修改不返回 ＩＤ号，用上了会让ＩＤ抹去
+							var revData = result.msg.split(";"); //将得到返回结果用 ； 分离成数组
+							handOrderId = revData[1];0
+					//		message['ID'] = handOrderId; //保存后需要将ID填到 message正，为了修改
+							$("#input-ORDER_NO").textbox("setValue", revData[2]);
+							$.messager.alert("提示", "保存成功！");
+							findbyId(handOrderId);
+						} else {
+							findbyId(handOrderId);
+							$.messager.alert("提示", "保存修改成功！");
+						}
+					},
+					error: function(result) {
+						$.messager.alert("错误", "保存不成功");
+					}
+				});
+			}
+
+			/**
+			 * 查询页面
+			 * 为了在保存后填写必要内容以修改
+			 */
+			function findbyId(Id) {
+				console.log("I find !")
+				var _url = 'http://222.196.35.35:9080/GSMS/logistics/originalorder/findbyid.do?ID=' + Id;
+				loadDate(_url);
+			}
+
+			/**
+			 * DOM加载完毕执行代码
+			 * 获取订单张数上下限
+			 * 创建填写可编辑的数据表格 edatagrid
+			 * 当 DOM（文档对象模型） 已经加载，并且页面（包括图像）已经完全呈现时，会发生 ready 事件。
+			 * 由于该事件在文档就绪后发生，因此把所有其他的 jQuery 事件和函数置于该事件中是非常好的做法。正如上面的例子中那样。
+			 */
+			$(document).ready(function() {
+				getbound();
+				createEdatagrid();
+			});
+		</script>
+	</body>
+</html>

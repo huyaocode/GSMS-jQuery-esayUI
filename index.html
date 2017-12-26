@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>高水rebuild</title>
+		<link href="css/default.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="themes/default/easyui.css" />
+		<link rel="stylesheet" type="text/css" href="themes/icon.css" />
+		<link rel="stylesheet" type="text/css" href="css/basic.css" />
+	</head>
+
+	<body>
+		<table width="100%">
+			<tr>
+				<td width="20%"><img src="img/GSlogo.png" alt="高水菜市场" width="80%" height="auto" /></td>
+				<td id="td_menu" style="padding-left:20px;"></td>
+				<td id="td_user">
+					<a id="user_name" class="easyui-menubutton" data-options="menu:'#mm_user', iconCls:'icon-man'"></a>
+					<div id="mm_user">
+						<div id="changePasswd" data-option="iconCls:'icon-edit'">修改密码</div>
+						<div id="logout" data-options="iconCls:'icon-cancel'" onclick="logout()">退出登录</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+		<div id="div_menu"></div>
+		<div id="tabs" class="easyui-tabs" style="width:100%; height: 670px;"></div>
+
+	</body>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+	<script src="js/jquery.edatagrid.js" type="text/javascript"></script>
+	<script type="text/javascript" src='js/common.js'></script>
+	<script src="js/functions.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var _menus = {
+			basic: [{
+				"menuid": "1",
+				"menuname": "物流管理",
+				"icon": "icon-logistic",
+				"menus": [{
+						"menuid": "011",
+						"menuname": "原始单据",
+						"menus": [{
+							"menuid": "0112",
+							"menuname": "手工订单",
+							"url": "pre_order.html"
+						}, {
+							"menuid": "0111",
+							"menuname": "网络订单",
+							"url": "salesOrder.html"
+						}]
+					}, {
+						"menuid": "012",
+						"menuname": "采购流程",
+						"icon": "icon-logistic",
+						"menus": [{
+							"menuid": "0121",
+							"menuname": "销售订单",
+							"url": "UI/LOGISTICS/SellOrder/SellOrderAdd.html"
+						}, {
+							"menuid": "0122",
+							"menuname": "采购单",
+							"url": "UI/LOGISTICS/PurchaseOrder/PurchaseOrderSearch.html"
+						}, {
+							"menuid": "0123",
+							"menuname": "入库单",
+							"url": "UI/LOGISTICS/WareHouseSchedule/WareHouseScheduleSearch.html"
+						}, ]
+					}, {
+						"menuid": "013",
+						"menuname": "销售流程",
+						"menus": [{
+							"menuid": "0131",
+							"menuname": "销售单",
+							"url": "salesOrder.html"
+						}, {
+							'menuid': "0132",
+							"menuname": "出库单",
+							"url": "UI/LOGISTICS/WareHouseOutOrder/WareHouseOutOrderSearch.html"
+						}, {
+							'menuid': "0133",
+							"menuname": "配送管理",
+							"url": "UI/LOGISTICS/DeliverManagementOrder/DeliverManagementOrderSearch.html"
+						}, {
+							'menuid': "0134",
+							"menuname": "销售结算",
+							"url": "UI/LOGISTICS/SalesSettlementOrder/SalesSettlementSearch.html"
+						}, ]
+					}, {
+						"menuid": "014",
+						"menuname": "库房管理",
+						"menus": [{
+							'menuid': "0141",
+							"menuname": "库存盘点",
+							"url": "UI/LOGISTICS/InventoryOrder/InventoryOrderAdd.html"
+						}, {
+							'menuid': "0142",
+							"menuname": "冲销帐",
+							"url": "UI/LOGISTICS/WriteOff/WriteOffAdd.html"
+						}, {
+							"menuid": "0143",
+							"menuname": "移库单",
+							"url": "UI/LOGISTICS/StockTransferOrder/StockTransferOrderAdd.html"
+						}, ]
+					}, {
+						"menuid": "015",
+						"menuname": "物流管理日志",
+						"menus": [{
+							'menuid': "0151",
+							"menuname": "订单日志",
+							"url": "UI/LOGISTICS/ExecuteOrder/ExecuteOrderList.html"
+						}, {
+							'menuid': "0152",
+							"menuname": "修改记录",
+							"url": "UI/LOGISTICS/Log/LogSearch.html"
+						}, ]
+					},
+					{
+						"menuid": "015",
+						"menuname": "价格维护",
+						"menus": [{
+							'menuid': "0151",
+							"menuname": "后定价价格维护",
+							"url": "UI/LOGISTICS/BasicInformationPrice/BasicInformationPriceAdd.html"
+						}, {
+							'menuid': "0152",
+							"menuname": "采购价格价格维护",
+							"url": "UI/LOGISTICS/BasicInformationInPrice/BasicInformationInPriceAdd.html"
+						}, ]
+					},
+				]
+			}, {
+				"menuid": "2",
+				"menuname": "市场管理",
+				"icon": "icon-market",
+				"menus": [{
+					"menuid": "021",
+					"menuname": "商户管理",
+					"menus": [{
+						"menuid": "0211",
+						"menuname": "固定商户管理",
+						"url": "UI/Market/BusinessInformation/BusinessInformationSearch.html"
+					}, {
+						"menuid": "0212",
+						"menuname": "小商户管理",
+						"url": "UI/Market/SmallBusinessInformation/SmallBusinessInformationSearch.html"
+					}]
+				}, {
+					"menuid": "022",
+					"menuname": "合同管理",
+					"menus": [{
+							"menuid": "0221",
+							"menuname": "合同管理",
+							"url": "UI/Market/BIContract/BIContractSearch.html"
+						},
+						{
+							"menuid": "0222",
+							"menuname": "合同汇总",
+							"url": "UI/Market/BoothManagement/BoothManagementStatistics.html"
+						}
+					]
+				}, {
+					"menuid": "023",
+					"menuname": "摊位管理",
+					"menus": [{
+							"menuid": "0231",
+							"menuname": "摊位管理",
+							"url": "UI/Market/BoothManagement/BoothManagementSearch.html"
+						},
+						{
+							"menuid": "0231",
+							"menuname": "摊位卡证管理",
+							"url": "UI/Market/BoothCard/BoothCardList.html"
+						}
+					]
+				}, {
+					"menuid": "024",
+					"menuname": "事件管理",
+					"menus": [{
+						"menuid": "0241",
+						"menuname": "突发事件",
+						"url": "UI/Market/EmergentEventManagement/EmergentEventsAdd.html"
+					}, {
+						"menuid": "0242",
+						"menuname": "退市事件",
+						"url": "UI/Market/DelistEventManagement/DelistEventManagementAdd.html"
+					}, {
+						"menuid": "0243",
+						"menuname": "纠纷事件",
+						"url": "UI/Market/DisputeEventManagement/DisputeEventManagementAdd.html"
+					}, {
+						"menuid": "0244",
+						"menuname": "商户表彰",
+						"url": "UI/Market/CommendEventManagement/CommendEventsAdd.html"
+					}, {
+						"menuid": "0245",
+						"menuname": "商户违章",
+						"url": "UI/Market/PeccancyEventManagement/PeccancyEventManagementAdd.html"
+					}]
+				}, {
+					"menuid": "025",
+					"menuname": "设备管理",
+					"menus": [{
+						"menuid": "0251",
+						"menuname": "设备管理",
+						"url": "UI/Market/EquipmentManagement/EquipmentManagementSearch.html"
+					}, {
+						"menuid": "0252",
+						"menuname": "设备维护",
+						"url": "UI/Market/EquipmentRepairManagement/EquipmentRepairManagementAdd.html"
+					}, ]
+				}, {
+					"menuid": "026",
+					"menuname": "收费管理",
+					"menus": [{
+						"menuid": "0261",
+						"menuname": "收费管理",
+						"url": "UI/Market/Receipt/receiptAdd.html"
+					}]
+				}, {
+					"menuid": "027",
+					"menuname": "市场地图",
+					"menus": [{
+						"menuid": "0271",
+						"menuname": "主地图",
+						"url": "UI/Market/MAP/MarketMap.html"
+					}, {
+						"menuid": "0272",
+						"menuname": "蔬菜区地图",
+						"url": "UI/Market/MAP/Map_2_1.html"
+					}, {
+						"menuid": "0273",
+						"menuname": "水果区地图",
+						"url": "UI/Market/MAP/Map_2_2.html"
+					}]
+				}, {
+					"menuid": "028",
+					"menuname": "关怀系统",
+					"menus": [{
+						"menuid": "0281",
+						"menuname": "即时短信",
+						"url": "UI/Market/SMSInTime/SMSInTimeList.html"
+					}, {
+						"menuid": "0282",
+						"menuname": "定时短信",
+						"url": "UI/Market/SMSScheduler/SMSSchedulerList.html"
+					}, {
+						"menuid": "0282",
+						"menuname": "短信模板",
+						"url": "UI/Market/SMSModule/SMSModuleList.html"
+					}, {
+						"menuid": "0282",
+						"menuname": "短信发送情况",
+						"url": "UI/Market/SMSScheduler/SMSScheduleSendList.html"
+					}, ]
+				}, {
+					"menuid": "029",
+					"menuname": "食品安全",
+					"menus": [{
+						"menuid": "0291",
+						"menuname": "安全事件",
+						"url": "UI/Market/FoodSecurityManagement/FoodSecurityManagementSearch.html"
+					}, {
+						"menuid": "0292",
+						"menuname": "抽查周期",
+						"url": "UI/Market/FoodSecurityCycle/FoodSecurityCycleList.html"
+					}]
+				}]
+			}, {
+				"menuid": "3",
+				"menuname": "气调库管理",
+				"icon": "icon-frozencave",
+				"menus": [{
+					"menuid": "031",
+					"menuname": "库房管理",
+					"menus": [{
+							"menuid": "0311",
+							"menuname": "库房信息",
+							"url": "UI/FrozenCave/StoreHouseInformation/StoreHouseInformationSearch.html"
+						}, {
+							"menuid": "0312",
+							"menuname": "租赁操作",
+							"url": "UI/FrozenCave/LeasingOperation/LeasingOperationList.html"
+						}, {
+							"menuid": "0313",
+							"menuname": "库房维修维护",
+							"url": "UI/FrozenCave/StoreHouseRepair/StoreHouseRepairAdd.html"
+						}, {
+							"menuid": "0314",
+							"menuname": "包库管理",
+							"url": "UI/FrozenCave/PackageStoreHouse/PackageStoreHouseSearch.html"
+						},
+						{
+							"menuid": "0314",
+							"menuname": "库房温度记录表",
+							"url": "UI/FrozenCave/WarehouseTemperature/WarehouseTemperatureList.html"
+						},
+
+					]
+				}, {
+					"menuid": "032",
+					"menuname": "租户管理",
+					"menus": [{
+						"menuid": "0321",
+						"menuname": "租户基础信息",
+						"url": "UI/FrozenCave/TenantInformation/TenantInformationSearch.html"
+					}, {
+						"menuid": "0322",
+						"menuname": "租户明细账",
+						"url": "UI/FrozenCave/TenantCharge/TenantChargeSearch.html"
+					}]
+				}]
+			}, {
+				"menuid": "4",
+				"menuname": "基础信息",
+				"icon": "icon-information",
+				"menus": [{
+					"menuid": "041",
+					"menuname": "物流基础信息",
+					"menus": [{
+							"menuid": "0411",
+							"menuname": "供货单位",
+							"url": "UI/LOGISTICS/BasicInformation/BasicInformationSupplyUnitList.html"
+						}, {
+							"menuid": "0412",
+							"menuname": "商品转换表",
+							"url": "UI/LOGISTICS/BasicInformation/BasicInformationConvertTableList.html"
+						}, {
+							"menuid": "0413",
+							"menuname": "订货单位",
+							"url": "UI/LOGISTICS/BasicInformation/BasicInformationOrderUnitList.html"
+						}, {
+							"menuid": "0414",
+							"menuname": "内部商品管理",
+							"url": "UI/LOGISTICS/BasicInformation/BasicInformationInternalProductGradingList.html"
+						}, {
+							"menuid": "0414",
+							"menuname": "内部商品类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=internaltradetype"
+						}, {
+							"menuid": "0418",
+							"menuname": "用户组",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=customertype"
+						}, {
+							"menuid": "0419",
+							"menuname": "库房名称",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=logisticsstorehouse"
+						}, {
+							"menuid": "0420",
+							"menuname": "商品质量",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=logisticslevel"
+						},
+						{
+							"menuid": "0420",
+							"menuname": "配送类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=delivertype"
+						},
+					]
+
+				}, {
+					"menuid": "042",
+					"menuname": "市场基础信息",
+					"menus": [{
+							"menuid": "0421",
+							"menuname": "卡证信息",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=boostcard"
+						}, {
+							"menuid": "0282",
+							"menuname": "短信设置",
+							"url": "UI/Market/SMSModule/SMSConfig.html"
+						}, {
+							"menuid": "0282",
+							"menuname": "责任书",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=duty"
+						}, {
+							"menuid": "0282",
+							"menuname": "短期合同名称",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=shorttype"
+						}, {
+							"menuid": "0282",
+							"menuname": "合同类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=contracttype"
+						}, {
+							"menuid": "0282",
+							"menuname": "市场收费类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=marketchargetype"
+						}, {
+							"menuid": "0282",
+							"menuname": "营业执照类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=businesslicensetype"
+						}, {
+							"menuid": "0282",
+							"menuname": "设备类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=devicetype"
+						},
+						{
+							"menuid": "0282",
+							"menuname": "市场区域类型",
+							"url": "UI/Market/DictData/DictDataAdd.html?id=regiontype"
+						},
+						{
+							"menuid": "0282",
+							"menuname": "摊位收费标准",
+							"url": "UI/Market/BoothChargeRatio/BoothChargeRatioSearch.html"
+						}, {
+							"menuid": "0282",
+							"menuname": "市场区域名称",
+							"url": "UI/Market/Region/RegionAdd.html"
+						}
+					]
+				}, {
+					"menuid": "043",
+					"menuname": "气调库基础信息",
+					"menus": [{
+						"menuid": "0431",
+						"menuname": "气调库收费类型",
+						"url": "UI/Market/DictData/DictDataAdd.html?id=frozenchargetype"
+					}, {
+						"menuid": "0431",
+						"menuname": "气调库收费标准",
+						"url": "UI/FrozenCave/FrozenChargeRatio/FrozenChargeRatioSearch.html"
+					}, {
+						"menuid": "0282",
+						"menuname": "库房维护类型",
+						"url": "UI/Market/DictData/DictDataAdd.html?id=repairtype"
+					}, {
+						"menuid": "0283",
+						"menuname": "气调库内部商品管理",
+						"url": "UI/FrozenCave/InternalGoods/InternalGoodsSearch.html"
+					}]
+				}]
+			}, {
+				"menuid": "5",
+				"menuname": "基础设置",
+				"icon": "icon-usermanagement",
+				"menus": [{
+					"menuid": "051",
+					"menuname": "用户权限",
+					"menus": [{
+						"menuid": "0512",
+						"menuname": "角色管理",
+						"url": "UI/Common/roleManager/roleManagerList.html"
+					}, {
+						"menuid": "0513",
+						"menuname": "用户管理",
+						"url": "UI/Common/UserManager/UserList.html"
+					}, {
+						"menuid": "0415",
+						"menuname": "部门信息",
+						"url": "UI/Market/DictData/DictDataAdd.html?id=department"
+					}, {
+						"menuid": "0415",
+						"menuname": "系统设置",
+						"url": "UI/Common/Set/Set.html"
+					}, ]
+				}, {
+					"menuid": "052",
+					"menuname": "菜单管理",
+					"menus": [{
+						"menuid": "0521",
+						"menuname": "菜单配置",
+						"url": "UI/Common/Menu/MenuList.html"
+					}, ]
+				}]
+			}, ]
+		};
+
+		CreateMenu(_menus);
+
+		/*
+		 * 构建菜单
+		 * 创建下拉次啊的时候一定要ID，　因为ｉｄ是拿来匹配上对应的下拉框内容的
+		 */
+		function CreateMenu(_data) {
+			/////构建第一级菜单
+			var s = _data.basic;
+			var content = "";
+			var menuid = "";
+			var maincontent = "";
+			maincontent += "<div class='easyui-panel' style='background-color:#D2E0F2; padding:5px; border-style:none;'>";
+			for(var i = 0; i < s.length; i++) {
+				menuid = "#mm" + s[i].menuid;
+				maincontent += "<a href='#'   class='easyui-menubutton' data-options=\"menu:'" + menuid + "',iconCls:'" + s[i].icon + "'\">" + s[i].menuname + "</a>";
+			}
+			maincontent += "</div>";
+			$("#td_menu").append(maincontent);
+			////构建下级菜单
+			for(var i = 0; i < s.length; i++) {
+				menuid = "mm" + s[i].menuid;
+				content += "<div name=" + _parentname + " id=\"" + menuid + "\" style='width:150px;display:none;' class=\"easyui-menu\" data-options=\" onClick:menuHandler\">";
+				if(s[i].menus != undefined) {
+					var m = s[i].menus;
+					for(var j = 0; j < m.length; j++) {
+						if(m[j].menus != undefined) //有子节点的情况
+						{
+							content += "<div>";
+							content += "<span>" + m[j].menuname + "</span>";
+							content += "<div>";
+							for(k = 0; k < m[j].menus.length; k++) {
+								content += "<div name='" + m[j].menus[k].url + "'>" + m[j].menus[k].menuname + "</div>";
+							}
+							content += "</div>";
+							content += "</div>";
+						} else {
+							var _parentname = m[j].url;
+							content += "<div name=" + _parentname + ">" + m[j].menuname + "</div>";
+						}
+					}
+				}
+				content += "</div>";
+			}
+			$("#div_menu").append(content);
+		}
+	</script>
+</html>

@@ -1,0 +1,84 @@
+@charset "utf-8";
+* {
+	padding: 0px;
+	margin: 0px;
+}
+
+/*------------table----------------*/
+
+.displaytable {
+	border="0";
+	width: 80%;
+	margin: 0 auto;
+	height: 80px;
+}
+
+.displaytable span {
+	color: red;
+}
+
+#check{
+	display: block;
+	width: 75px;
+	right: 0;
+	position: absolute;
+	/**/
+}
+/*-----------------内容-------------------*/
+
+#footer {
+	padding: 10px;
+}
+
+#account {
+	display: inline-block;
+	width: 100px;
+}
+
+#accountUpper {
+	display: inline-block;
+	width: 100px;
+}
+
+#detail {
+	width: 850px;
+	height: 60px;
+	margin: auto;
+}
+
+#formNew div {
+	margin: 20px 0 20px 15px;
+}
+
+
+#price {
+	font-size: 12px;
+	margin: 0;
+	padding: 4px;
+	vertical-align: top;
+	padding: 0;
+}
+
+#footer > strong > span{
+	display: inline-block;
+	width: 160px;
+	text-indent: 10px;
+}
+.search{
+	height: 25px;
+	line-height: 25px;
+	background-color: rgb(224,236,255);
+	text-indent: 5px;
+	border: 1px solid rgb(149,183,231);
+	font-weight: 600;
+}
+#tools{
+	padding: 10px;
+}
+.icon-left {
+	background: url('../img/left.png') no-repeat center center;
+}
+
+.icon-right {
+	background: url('../img/right.png') no-repeat center center;
+}
